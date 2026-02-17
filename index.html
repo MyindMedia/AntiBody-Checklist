@@ -154,13 +154,14 @@ body{font-family:-apple-system,sans-serif;background:#0d0d0d;color:#fff;min-heig
 const T={};
 const ST={};
 
-function st(id, evt){
-  document.querySelectorAll('.tb').forEach(b=>b.classList.remove('a'));
-  (evt || event).target.classList.add('a');
-  document.querySelectorAll('.tc').forEach(t=>t.classList.remove('a'));
+function st(id, e){
+  var btn = e && e.target ? e.target : event.target;
+  document.querySelectorAll('.tb').forEach(function(b){b.classList.remove('a')});
+  btn.classList.add('a');
+  document.querySelectorAll('.tc').forEach(function(t){t.classList.remove('a')});
   document.getElementById(id).classList.add('a');
-  // Hide plan viewer when switching tabs
   document.getElementById('planViewer').classList.remove('show');
+  document.getElementById('planOverlay').classList.remove('show');
 }
 
 function toggleDay(el){
@@ -211,8 +212,8 @@ function toggleTask(id){
   up()
 }
 
-function toggleSubtask(id){
-  if(event) event.stopPropagation();
+function toggleSubtask(id, e){
+  if(e){e.stopPropagation();}else if(event){event.stopPropagation();}
   ST[id]=!ST[id];
   localStorage.setItem('absub',JSON.stringify(ST));
   const cb = document.getElementById('subcb'+id);
@@ -274,8 +275,10 @@ function showPlan(w){
 }
 
 function closePlan(){
-  document.getElementById('planViewer').classList.remove('show');
-  document.getElementById('planOverlay').classList.remove('show');
+  var pv = document.getElementById('planViewer');
+  var po = document.getElementById('planOverlay');
+  if(pv) pv.classList.remove('show');
+  if(po) po.classList.remove('show');
 }
 </script>
 </body>
