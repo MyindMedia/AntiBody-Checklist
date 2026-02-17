@@ -82,7 +82,7 @@ body{font-family:-apple-system,sans-serif;background:#0d0d0d;color:#fff;min-heig
 .li2:hover{background:#1a1a2e;border-color:var(--primary);color:var(--primary)}
 .li2.active{background:#1a1a2e;border-color:var(--primary);color:var(--primary)}
 .ft{background:var(--bc);border-top:1px solid var(--br);padding:20px;margin-top:40px;text-align:center;font-size:13px;color:var(--tm)}
-.plan-viewer{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:600px;max-height:80vh;overflow-y:auto;background:#111;border:2px solid var(--primary);border-radius:16px;padding:25px;z-index:9999;display:none;box-shadow:0 20px 60px rgba(0,0,0,0.8)}
+.plan-viewer{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:600px;max-height:80vh;overflow-y:auto;background:#111;border:2px solid var(--primary);border-radius:16px;padding:25px;z-index:1000;display:none;box-shadow:0 20px 60px rgba(0,0,0,0.8)}
 .plan-viewer.show{display:block}
 .plan-viewer::backdrop{background:rgba(0,0,0,0.7)}
 .plan-title{font-size:20px;font-weight:700;color:var(--primary);margin-bottom:15px}
@@ -91,8 +91,8 @@ body{font-family:-apple-system,sans-serif;background:#0d0d0d;color:#fff;min-heig
 .plan-content ul{padding-left:20px}
 .plan-content li{margin:8px 0}
 .close-plan{float:right;background:var(--primary);color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px}
-.plan-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9998;display:none}
-.plan-overlay.show{display:block}
+
+
 </style>
 </head>
 <body>
@@ -143,7 +143,7 @@ body{font-family:-apple-system,sans-serif;background:#0d0d0d;color:#fff;min-heig
 </main>
 <footer class="ft">© 2026 Antibody Wear - Tracker</footer>
 
-<div id="planOverlay" class="plan-overlay" onclick="closePlan()"></div>
+
 <div id="planViewer" class="plan-viewer">
 <button class="close-plan" onclick="closePlan()">✕ Close</button>
 <h2 class="plan-title" id="planTitle"></h2>
@@ -154,14 +154,15 @@ body{font-family:-apple-system,sans-serif;background:#0d0d0d;color:#fff;min-heig
 const T={};
 const ST={};
 
-function st(id, e){
-  var btn = e && e.target ? e.target : event.target;
-  document.querySelectorAll('.tb').forEach(function(b){b.classList.remove('a')});
-  btn.classList.add('a');
-  document.querySelectorAll('.tc').forEach(function(t){t.classList.remove('a')});
+function st(id){
+  var btns = document.querySelectorAll('.tb');
+  for(var i=0;i<btns.length;i++){btns[i].classList.remove('a');}
+  event.target.classList.add('a');
+  var tabs = document.querySelectorAll('.tc');
+  for(var i=0;i<tabs.length;i++){tabs[i].classList.remove('a');}
   document.getElementById(id).classList.add('a');
-  document.getElementById('planViewer').classList.remove('show');
-  document.getElementById('planOverlay').classList.remove('show');
+  var pv = document.getElementById('planViewer');
+  if(pv){pv.classList.remove('show');}
 }
 
 function toggleDay(el){
@@ -212,8 +213,8 @@ function toggleTask(id){
   up()
 }
 
-function toggleSubtask(id, e){
-  if(e){e.stopPropagation();}else if(event){event.stopPropagation();}
+function toggleSubtask(id){
+  event.stopPropagation();
   ST[id]=!ST[id];
   localStorage.setItem('absub',JSON.stringify(ST));
   const cb = document.getElementById('subcb'+id);
