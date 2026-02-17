@@ -151,136 +151,122 @@ body{font-family:-apple-system,sans-serif;background:#0d0d0d;color:#fff;min-heig
 </div>
 
 <script>
-const T={};
-const ST={};
+var T = {};
+var ST = {};
 
-function st(id){
+function st(id) {
   var btns = document.querySelectorAll('.tb');
-  for(var i=0;i<btns.length;i++){btns[i].classList.remove('a');}
-  event.target.classList.add('a');
+  for(var i=0; i<btns.length; i++){ btns[i].classList.remove('a'); }
+  var e = window.event;
+  if(e && e.target){ e.target.classList.add('a'); }
   var tabs = document.querySelectorAll('.tc');
-  for(var i=0;i<tabs.length;i++){tabs[i].classList.remove('a');}
+  for(var i=0; i<tabs.length; i++){ tabs[i].classList.remove('a'); }
   document.getElementById(id).classList.add('a');
   var pv = document.getElementById('planViewer');
-  if(pv){pv.classList.remove('show');}
+  if(pv){ pv.classList.remove('show'); }
 }
 
-function toggleDay(el){
-  el.classList.toggle('o')
+function toggleDay(el) {
+  el.classList.toggle('o');
 }
 
-function toggleTask(id){
-  // Add locked class to tasks with incomplete subtasks
-  const taskEl = document.getElementById('li'+id);
+function toggleTask(id) {
+  var e = window.event;
+  if(e){ e.stopPropagation(); }
+  var taskEl = document.getElementById('li'+id);
   if(taskEl){
-    const subtaskContainer = taskEl.querySelector('.subtasks');
-    if(subtaskContainer){
-      const subcb = subtaskContainer.querySelectorAll('.subcb');
-      const allComplete = Array.from(subcb).every(el => el.classList.contains('checked'));
-      if(!allComplete && !document.getElementById('cb'+id).classList.contains('checked')){
-        taskEl.classList.add('locked');
-      } else {
-        taskEl.classList.remove('locked');
+    var subtaskContainer = taskEl.querySelector('.subtasks');
+    if(subtaskContainer && !T[id]){
+      var subcb = subtaskContainer.querySelectorAll('.subcb');
+      var allComplete = true;
+      for(var i=0; i<subcb.length; i++){
+        if(!subcb[i].classList.contains('checked')){
+          allComplete = false;
+          break;
+        }
       }
-    }
-  }
-  
-  // Check if this task has subtasks
-  const taskEl = document.getElementById('li'+id);
-  const subtaskContainer = taskEl ? taskEl.querySelector('.subtasks') : null;
-  
-  if(subtaskContainer){
-    // Has subtasks - check if all are complete
-    const subcb = subtaskContainer.querySelectorAll('.subcb');
-    const allComplete = Array.from(subcb).every(el => el.classList.contains('checked'));
-    
-    if(!allComplete){
-      // Not all subtasks done - don't allow main task completion
-      const mainCb = document.getElementById('cb'+id);
-      if(mainCb && !mainCb.classList.contains('checked')){
+      if(!allComplete){
         alert('Complete all subtasks first!');
+        T[id] = false;
         return;
       }
     }
   }
-  
-  T[id]=!T[id];
+  T[id] = !T[id];
   localStorage.setItem('ab',JSON.stringify(T));
-  const cb = document.getElementById('cb'+id);
-  const li = document.getElementById('li'+id);
+  var cb = document.getElementById('cb'+id);
+  var li = document.getElementById('li'+id);
   if(cb) cb.classList.toggle('checked');
   if(li) li.classList.toggle('checked');
-  up()
+  if(!T[id] && li){
+    li.closest('.ds').classList.add('o');
+  }
+  if(T[id] && li){
+    var daySection = li.closest('.ds');
+    var dayTitle = daySection.querySelector('.dn');
+    if(dayTitle) dayTitle.style.textDecoration = 'line-through';
+  }
+  up();
 }
 
-function toggleSubtask(id){
-  event.stopPropagation();
-  ST[id]=!ST[id];
+function toggleSubtask(id) {
+  var e = window.event;
+  if(e){ e.stopPropagation(); }
+  ST[id] = !ST[id];
   localStorage.setItem('absub',JSON.stringify(ST));
-  const cb = document.getElementById('subcb'+id);
-  const li = document.getElementById('subli'+id);
-  if(cb) cb.classList.toggle('checked');
-  if(li) li.classList.toggle('checked');
-  up()
+  var subcb = document.getElementById('subcb'+id);
+  var subli = document.getElementById('subli'+id);
+  if(subcb) subcb.classList.toggle('checked');
+  if(subli) subli.classList.toggle('checked');
+  up();
 }
 
-function up(){
-  const d=Object.values(T).filter(v=>v).length + Object.values(ST).filter(v=>v).length;
-  const p=Math.round(d/200*100);
-  document.getElementById('pct').textContent=p+'%';
-  document.getElementById('pp').textContent=p+'%';
-  document.getElementById('pf').style.width=p+'%';
-  document.getElementById('done').textContent=d+'/200';
-  document.getElementById('c').textContent=d;
-  document.getElementById('r').textContent=200-d
-}
-
-// Load saved state
-const s=localStorage.getItem('ab');
-const ss=localStorage.getItem('absub');
-if(s){
-  Object.assign(T,JSON.parse(s));
-  Object.keys(T).forEach(k=>{
-    if(T[k]){
-      document.getElementById('cb'+k)?.classList.add('checked');
-      document.getElementById('li'+k)?.classList.add('checked')
-    }
-  })
-}
-if(ss){
-  Object.assign(ST,JSON.parse(ss));
-  Object.keys(ST).forEach(k=>{
-    if(ST[k]){
-      document.getElementById('subcb'+k)?.classList.add('checked');
-      document.getElementById('subli'+k)?.classList.add('checked')
-    }
-  })
-}
-up();
-
-// Plan content
-const plans={
-week1:`<h3>Week 1: Foundation</h3><p>This week focuses on setting up your accounts and creating your first content.</p><ul><li><strong>Day 1:</strong> Set up TikTok & Instagram Business accounts, optimize profiles, create calendar</li><li><strong>Day 2:</strong> Define content pillars, generate ideas, select top 3</li><li><strong>Day 3:</strong> Write first 3 scripts, save to Drive</li><li><strong>Day 4:</strong> Film first videos (scripts 1-2) + B-roll</li><li><strong>Day 5:</strong> Edit and post first content</li><li><strong>Day 6:</strong> Batch film more content</li><li><strong>Day 7:</strong> Review analytics, plan Week 2</li></ul><h3>Key Goals:</h3><ul><li>Get accounts set up and optimized</li><li>Post first 3-4 pieces of content</li><li>Understand what content works</li></ul>`,
-week2:`<h3>Week 2: Engagement</h3><p>This week focuses on building community and increasing engagement.</p><ul><li><strong>Day 1:</strong> Post Week 2 kickoff, engage with community</li><li><strong>Day 2:</strong> Write new scripts based on Week 1 learnings</li><li><strong>Day 3:</strong> Film new content</li><li><strong>Day 4:</strong> Edit + DM outreach to potential collaborators</li><li><strong>Day 5:</strong> Heavy community engagement day</li><li><strong>Day 6:</strong> Batch film Week 3 content</li><li><strong>Day 7:</strong> Analytics review and Week 3 planning</li></ul><h3>Key Goals:</h3><ul><li>Build genuine connections</li><li>Increase engagement rate</li><li>Find your content voice</li></ul>`,
-week3:`<h3>Week 3: Finding Viral</h3><p>This week is about experimentation to find what goes viral.</p><ul><li><strong>Day 1:</strong> Try new content format, track results</li><li><strong>Day 2:</strong> Analyze Day 1, try second format</li><li><strong>Day 3:</strong> Film more experimental content</li><li><strong>Day 4:</strong> Replicate what worked</li><li><strong>Day 5:</strong> Launch UGC campaign</li><li><strong>Day 6:</strong> Batch create content</li><li><strong>Day 7:</strong> Review Week 3, plan final week</li></ul><h3>Key Goals:</h3><ul><li>Find 1-2 winning formats</li><li>Get first viral hit</li><li>Launch UGC campaign</li></ul>`,
-week4:`<h3>Week 4: Optimization</h3><p>This week focuses on scaling what works and setting up Month 2.</p><ul><li><strong>Day 1:</strong> Feature best UGC, post winning format</li><li><strong>Day 2:</strong> Scale winning content</li><li><strong>Day 3:</strong> Prepare affiliate program</li><li><strong>Day 4:</strong> Partnership outreach</li><li><strong>Day 5:</strong> Test paid ads</li><li><strong>Day 6:</strong> Batch content for Month 2</li><li><strong>Day 7:</strong> Final review, celebrate wins!</li></ul><h3>Key Goals:</h3><ul><li>Scale winning content</li><li>Launch affiliate program</li><li>Test paid ads</li></ul>`
-};
-
-function showPlan(w){
-  const weekNum = w.replace('week','');
-  const titles = ['Foundation','Engagement','Finding Viral','Optimization'];
+function showPlan(w) {
+  var weekNum = w.replace('week','');
+  var titles = ['Foundation','Engagement','Finding Viral','Optimization'];
   document.getElementById('planTitle').textContent = 'Week ' + weekNum + ': ' + (titles[parseInt(weekNum)-1] || '');
   document.getElementById('planContent').innerHTML = plans[w] || '<p>No plan available</p>';
   document.getElementById('planViewer').classList.add('show');
-  document.getElementById('planOverlay').classList.add('show');
 }
 
-function closePlan(){
-  var pv = document.getElementById('planViewer');
-  var po = document.getElementById('planOverlay');
-  if(pv) pv.classList.remove('show');
-  if(po) po.classList.remove('show');
+function closePlan() {
+  document.getElementById('planViewer').classList.remove('show');
 }
+
+function up() {
+  var total = 0, done = 0;
+  for(var k in T){ total++; if(T[k])done++; }
+  for(var k in ST){ if(ST[k])done++; }
+  var pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById('pct').textContent = pct + '%';
+  document.getElementById('pp').textContent = pct + '%';
+  document.getElementById('pf').style.width = pct + '%';
+  document.getElementById('done').textContent = done + '/92';
+  document.getElementById('c').textContent = done;
+  document.getElementById('r').textContent = 92 - done;
+}
+
+try {
+  T = JSON.parse(localStorage.getItem('ab') || '{}');
+  ST = JSON.parse(localStorage.getItem('absub') || '{}');
+  for(var k in T){
+    if(T[k]){
+      var cb = document.getElementById('cb'+k);
+      var li = document.getElementById('li'+k);
+      if(cb) cb.classList.add('checked');
+      if(li) li.classList.add('checked');
+    }
+  }
+  for(var k in ST){
+    if(ST[k]){
+      var subcb = document.getElementById('subcb'+k);
+      var subli = document.getElementById('subli'+k);
+      if(subcb) subcb.classList.add('checked');
+      if(subli) subli.classList.add('checked');
+    }
+  }
+  up();
+} catch(e) {}
 </script>
 </body>
 </html>
